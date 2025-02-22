@@ -5,13 +5,15 @@ import tkinter as tk
 import json
 import os
 import sys
-from PIL import Image, ImageTk
 
 # Set up the GPIO pin for the button
 button = gpiozero.Button(17, pull_up=True, bounce_time=0.1)
 
 # Initialize pygame mixer for sound playback
 pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=2048)
+
+# Initialize pygame for image handling
+pygame.init()
 
 # Create a tkinter window for displaying text
 root = tk.Tk()
@@ -22,12 +24,12 @@ root.update_idletasks()
 root.attributes('-fullscreen', True)
 root.configure(bg='black')
 
-# Load background image using Pillow
+# Load background image using pygame
 def load_background_image(image_path="bg.jpg"):
     try:
-        bg_image = Image.open(image_path)  # Load the image
-        bg_image = bg_image.resize((root.winfo_screenwidth(), root.winfo_screenheight()), Image.ANTIALIAS)  # Resize to fit the screen
-        bg_image = ImageTk.PhotoImage(bg_image)  # Convert to Tkinter format
+        # Load the image using pygame
+        bg_image = pygame.image.load(image_path)
+        bg_image = pygame.transform.scale(bg_image, (root.winfo_screenwidth(), root.winfo_screenheight()))  # Resize to fit the screen
         return bg_image
     except Exception as e:
         print(f"Error loading background image: {e}")
@@ -141,8 +143,11 @@ root.bind("<Escape>", exit_program)
 
 # Draw background image if available
 if bg_image:
-    background_label = tk.Label(root, image=bg_image)
-    background_label.place(relwidth=1, relheight=1)
+    def draw_background():
+        screen = pygame.display.set_mode((root.winfo_screenwidth(), root.winfo_screenheight()))
+        screen.blit(bg_image, (0, 0))
+        pygame.display.update()
+    draw_background()
 
 # Run the Tkinter event loop
 root.mainloop()
