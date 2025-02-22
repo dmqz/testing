@@ -9,27 +9,28 @@ import sys
 # Set up the GPIO pin for the button
 button = gpiozero.Button(17, pull_up=True, bounce_time=0.1)
 
-# Initialize pygame mixer for sound playback
+# Initialize pygame for image handling and sound playback
 pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=2048)
-
-# Initialize pygame for image handling
 pygame.init()
 
 # Create a tkinter window for displaying text
 root = tk.Tk()
 root.title("Clue Box")
 
-# Make the window full screen
-root.update_idletasks()
+# Set up the Tkinter window to be fullscreen
 root.attributes('-fullscreen', True)
 root.configure(bg='black')
+
+# Set up a label to display text on the screen
+label = tk.Label(root, text="", font=("Helvetica", 48), fg="white", bg="black", justify="center", wraplength=root.winfo_screenwidth()-50)
+label.pack(expand=True)
 
 # Load background image using pygame
 def load_background_image(image_path="bg.jpg"):
     try:
-        # Load the image using pygame
         bg_image = pygame.image.load(image_path)
-        bg_image = pygame.transform.scale(bg_image, (root.winfo_screenwidth(), root.winfo_screenheight()))  # Resize to fit the screen
+        # Resize the image to fit the screen size
+        bg_image = pygame.transform.scale(bg_image, (root.winfo_screenwidth(), root.winfo_screenheight()))
         return bg_image
     except Exception as e:
         print(f"Error loading background image: {e}")
@@ -37,10 +38,6 @@ def load_background_image(image_path="bg.jpg"):
 
 # Load the background image
 bg_image = load_background_image()
-
-# Set up a label to display text on the screen
-label = tk.Label(root, text="", font=("Helvetica", 48), fg="white", bg="black", justify="center", wraplength=root.winfo_screenwidth()-50)
-label.pack(expand=True)
 
 # Function to load clues from a configuration file (JSON)
 def load_clues(config_file='config.json'):
@@ -120,7 +117,7 @@ def check_button_hold():
     else:
         button_press_start_time = None
 
-    root.after(100, check_button_hold)  # This line should be correctly closed
+    root.after(100, check_button_hold)
 
 # Function to safely exit when Escape key is pressed
 def exit_program(event=None):
@@ -141,12 +138,14 @@ root.bind('<Configure>', adjust_font_size)
 # Bind the Escape key to quit the application
 root.bind("<Escape>", exit_program)
 
-# Draw background image if available
+# Draw the background using pygame
 if bg_image:
     def draw_background():
-        screen = pygame.display.set_mode((root.winfo_screenwidth(), root.winfo_screenheight()))
-        screen.blit(bg_image, (0, 0))
-        pygame.display.update()
+        # Create a Pygame window with the same size as the Tkinter window
+        screen = pygame.display.set_mode((root.winfo_screenwidth(), root.winfo_screenheight()), pygame.NOFRAME)
+        screen.blit(bg_image, (0, 0))  # Draw the background image
+        pygame.display.update()  # Update the display with the background
+
     draw_background()
 
 # Run the Tkinter event loop
