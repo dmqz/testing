@@ -60,13 +60,36 @@ def reset_app():
         print("Resetting the app...")
         press_count = 0
         reset_triggered = True
+        screen.fill((0, 0, 0))  # Clear the screen (black)
+        pygame.display.update()
+        draw_text("Welcome to the Clue Box!\nPress the button to start.", size=48)
+        pygame.display.update()
 
-# Function to draw text on screen
+# Function to draw wrapped text on screen
 def draw_text(text, size=48, color=(255, 255, 255)):
     font = pygame.font.SysFont("Helvetica", size)
-    text_surface = font.render(text, True, color)
-    text_rect = text_surface.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
-    screen.blit(text_surface, text_rect)
+    words = text.split(' ')
+    lines = []
+    line = ""
+    
+    # Split text into lines based on screen width
+    for word in words:
+        test_line = line + " " + word if line else word
+        text_width, text_height = font.size(test_line)
+        if text_width <= screen.get_width() - 50:
+            line = test_line
+        else:
+            lines.append(line)
+            line = word
+    lines.append(line)  # Add the last line
+
+    y_offset = screen.get_height() // 4  # Start text in the middle of the screen
+
+    for line in lines:
+        text_surface = font.render(line, True, color)
+        text_rect = text_surface.get_rect(center=(screen.get_width() // 2, y_offset))
+        screen.blit(text_surface, text_rect)
+        y_offset += text_height  # Move down for next line
 
 # Function to play a new clue
 def play_new_clue(clue):
